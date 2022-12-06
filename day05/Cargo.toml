@@ -1,18 +1,17 @@
 [package]
-name = "aoc-2022"
+name = "day05"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+regex = "1"
 
-[workspace]
-members = [
-    "day00",
-    "day01",
-    "day02",
-    "day03",
-    "day04",
-    "day05",
-]
+[[bin]]
+name = "part1"
+path = "src/part1.rs"
+
+[[bin]]
+name = "part2"
+path = "src/part2.rs"
