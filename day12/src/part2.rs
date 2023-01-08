@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use std::{
-    collections::HashMap,
+    collections::{BinaryHeap, HashMap},
     fs::File,
     io::{self, BufRead},
 };
@@ -33,19 +33,33 @@ fn _line_words(path: &str) -> io::Result<Vec<Vec<String>>> {
 
 type Position = (usize, usize);
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct ShortestPath {
     position: Position,
     from: Position,
     steps: usize,
+    height: u8,
+}
+
+impl Ord for ShortestPath {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.height.cmp(&other.height)
+    }
+}
+
+impl PartialOrd for ShortestPath {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl ShortestPath {
-    fn new(position: Position, from: Position, steps: usize) -> Self {
+    fn new(position: Position, from: Position, steps: usize, height: u8) -> Self {
         Self {
             position,
             from,
             steps,
+            height,
         }
     }
 }
@@ -100,11 +114,13 @@ impl Map {
         // Begin from `start` and hill climb until we get to the end
         let mut shortest: HashMap<Position, ShortestPath> = HashMap::new();
 
-        // NOTE: I think We could make this faster using a greedy algorithm
-        // with early stop (see `std::collections::BinaryHeap`)
-        // Depth-first search
-        // A candidate is a tuple (pos, from, steps)
-        let mut candidates = Vec::from([ShortestPath::new(start, start, 0)]);
+        // Greedy algorithm
+        let mut candidates = BinaryHeap::from([ShortestPath::new(
+            start,
+            start,
+            0,
+            self.height_at(start).unwrap(),
+        )]);
         while let Some(path) = candidates.pop() {
             let position = path.position;
             // Check if there's already a shortest path for this
@@ -142,11 +158,12 @@ impl Map {
                 // at the beginning
                 .sorted_by_key(|x| x.1.unwrap())
                 .rev()
-                .for_each(|(pos, _)| {
+                .for_each(|(pos, height)| {
                     candidates.push(ShortestPath::new(
                         (pos.0 as usize, pos.1 as usize),
                         path.position,
                         path.steps + 1,
+                        height.unwrap(),
                     ))
                 });
         }
