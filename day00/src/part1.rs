@@ -4,13 +4,19 @@ use std::{
 };
 
 fn main() -> io::Result<()> {
-    let input = parse("input.txt")?;
+    let input = lines("input.txt")?;
     let solution = solve(input);
     println!("{solution}");
     Ok(())
 }
 
-fn parse(path: &str) -> io::Result<Vec<Vec<String>>> {
+fn lines(path: &str) -> io::Result<Vec<String>> {
+    let file = File::open(path)?;
+    let lines = io::BufReader::new(file).lines();
+    Ok(lines.into_iter().flatten().collect())
+}
+
+fn _line_words(path: &str) -> io::Result<Vec<Vec<String>>> {
     let file = File::open(path)?;
     let lines = io::BufReader::new(file).lines();
 
@@ -23,7 +29,7 @@ fn parse(path: &str) -> io::Result<Vec<Vec<String>>> {
     Ok(parsed)
 }
 
-fn solve(input: Vec<Vec<String>>) -> u64 {
+fn solve(_input: Vec<String>) -> u64 {
     1
 }
 
@@ -33,7 +39,7 @@ mod tests {
 
     #[test]
     fn test_sample() {
-        let input = parse("sample.txt").unwrap();
+        let input = lines("sample.txt").unwrap();
         let solution = solve(input);
         assert_eq!(solution, 0)
     }
